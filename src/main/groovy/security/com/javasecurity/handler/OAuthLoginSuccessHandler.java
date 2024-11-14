@@ -10,9 +10,9 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import security.com.javasecurity.entiry.RefreshToken;
-import security.com.javasecurity.entiry.RefreshTokenRepository;
+import security.com.javasecurity.repository.RefreshTokenRepository;
 import security.com.javasecurity.entiry.User;
-import security.com.javasecurity.entiry.UserRepository;
+import security.com.javasecurity.repository.UserRepository;
 import security.com.javasecurity.jwt.JwtUtil;
 import security.com.javasecurity.userinfo.GoogleUserInfo;
 import security.com.javasecurity.userinfo.KakaoUserInfo;

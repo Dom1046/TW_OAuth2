@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import security.com.javasecurity.dto.ApiResponse;
-import security.com.javasecurity.dto.SuccessStatus;
-import security.com.javasecurity.entiry.TokenResponse;
+import security.com.javasecurity.exception.status.SuccessStatus;
+import security.com.javasecurity.dto.TokenResponse;
 import security.com.javasecurity.service.TokenService;
 
 @RestController

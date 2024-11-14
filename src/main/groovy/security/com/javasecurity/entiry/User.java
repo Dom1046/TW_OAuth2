@@ -26,6 +26,15 @@ public class User {
     @Column(name = "name", nullable = false, length = 5)
     private String name;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "role", nullable = false)
+    private UserRole role;
+
+    @Column(name = "email", nullable = false)
+    private String email;
+
     @Column(name = "provider", nullable = false, length = 10)
     private String provider;
 

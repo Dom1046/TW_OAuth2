@@ -11,6 +11,9 @@ import security.com.javasecurity.exception.TokenErrorResult;
 import security.com.javasecurity.exception.TokenException;
 
 import javax.crypto.SecretKey;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.UUID;
 
@@ -19,21 +22,24 @@ import java.util.UUID;
 public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
-
+    //시크릿 키로 키 발급
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor( SECRET_KEY.getBytes(StandardCharsets.UTF_8) );
     }
 
     // 액세스 토큰을 발급하는 메서드
     public String generateAccessToken(UUID userId, long expirationMillis) {
         log.info("액세스 토큰이 발행되었습니다.");
 
-        return Jwts.builder()
-                .claim("userId", userId.toString()) // 클레임에 userId 추가
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(this.getSigningKey())
+        Date now = new Date();  //토큰 발행 시간
+        return Jwts.builder().header().add("alg", "HS256").add("type", "JWT")
+                .and()
+                .issuedAt(now)     //토큰 발행 시간
+                .expiration(       //토큰 만료 시간
+                        new Date( now.getTime() +
+                                Duration.ofMinutes(min).toMillis()) )
+                .claims(valueMap)  //저장 데이터
+                .signWith(getSigningKey())     //서명
                 .compact();
     }
 

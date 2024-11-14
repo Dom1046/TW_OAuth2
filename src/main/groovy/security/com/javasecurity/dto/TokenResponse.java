@@ -1,4 +1,4 @@
-package security.com.javasecurity.entiry;
+package security.com.javasecurity.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

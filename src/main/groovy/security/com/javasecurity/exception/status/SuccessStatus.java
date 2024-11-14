@@ -1,8 +1,9 @@
-package security.com.javasecurity.dto;
+package security.com.javasecurity.exception.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+import security.com.javasecurity.dto.ReasonDto;
 import security.com.javasecurity.exception.BaseCode;
 
 @Getter

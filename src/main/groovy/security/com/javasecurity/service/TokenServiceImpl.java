@@ -23,6 +23,7 @@ public class TokenServiceImpl implements TokenService {
     private final JwtUtil jwtUtil;
 
     @Override
+    //어세스 토큰 재발행
     public TokenResponse reissueAccessToken(String authorizationHeader) {
         String refreshToken = jwtUtil.getTokenFromHeader(authorizationHeader);
         String userId = jwtUtil.getUserIdFromToken(refreshToken);

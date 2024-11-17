@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -24,22 +25,19 @@ public class JwtUtil {
     private String SECRET_KEY;
     //시크릿 키로 키 발급
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor( SECRET_KEY.getBytes(StandardCharsets.UTF_8) );
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     // 액세스 토큰을 발급하는 메서드
     public String generateAccessToken(UUID userId, long expirationMillis) {
         log.info("액세스 토큰이 발행되었습니다.");
 
-        Date now = new Date();  //토큰 발행 시간
-        return Jwts.builder().header().add("alg", "HS256").add("type", "JWT")
-                .and()
-                .issuedAt(now)     //토큰 발행 시간
-                .expiration(       //토큰 만료 시간
-                        new Date( now.getTime() +
-                                Duration.ofMinutes(min).toMillis()) )
-                .claims(valueMap)  //저장 데이터
-                .signWith(getSigningKey())     //서명
+        return Jwts.builder()
+                .claim("userId", userId.toString()) // 클레임에 userId 추가
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -64,13 +62,14 @@ public class JwtUtil {
     public String getUserIdFromToken(String token) {
         try {
             String userId = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .get("userId", String.class);
             log.info("유저 id를 반환합니다.");
             return userId;
+            //멀티 catch구문 둘 중의 어느것이 발생해도 예외처리
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.warn("유효하지 않은 토큰입니다.");
@@ -81,6 +80,7 @@ public class JwtUtil {
     // Jwt 토큰의 유효기간을 확인하는 메서드
     public boolean isTokenExpired(String token) {
         try {
+            Date now = new Date();
             Date expirationDate = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
@@ -88,7 +88,7 @@ public class JwtUtil {
                     .getPayload()
                     .getExpiration();
             log.info("토큰의 유효기간을 확인합니다.");
-            return expirationDate.before(new Date());
+            return expirationDate.before(now);
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.warn("유효하지 않은 토큰입니다.");

@@ -35,10 +35,10 @@ public class User {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "provider", nullable = false, length = 10)
+    @Column(name = "provider", length = 10)
     private String provider;
 
-    @Column(name = "provider_id", nullable = false, length = 50)
+    @Column(name = "provider_id", length = 50)
     private String providerId;
 
     @CreationTimestamp

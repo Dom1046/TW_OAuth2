@@ -1,7 +1,6 @@
 package security.com.securityjwt.oauth2.response;
 
 import lombok.RequiredArgsConstructor;
-
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -16,16 +15,32 @@ public class NaverResponse implements OAuth2Response {
 
     @Override
     public String getProviderId() {
-        return attribute.get("id").toString();
+        Map<String, Object> response = getResponse();
+        Object id = response.get("id");
+        return id != null ? id.toString() : "";
     }
-
     @Override
     public String getEmail() {
-        return attribute.get("email").toString();
+        Map<String, Object> response = getResponse();
+        Object email = response.get("email");
+        return email != null ? email.toString() : "";
     }
 
     @Override
     public String getName() {
-        return attribute.get("name").toString();
+        Map<String, Object> response = getResponse();
+        Object name = response.get("name");
+        return name != null ? name.toString() : "";
+    }
+    /**
+     * Helper method to safely extract the `response` object from attributes.
+     * Throws IllegalArgumentException if `response` is not a valid Map.
+     */
+    private Map<String, Object> getResponse() {
+        Object response = attribute.get("response");
+        if (response instanceof Map) {
+            return (Map<String, Object>) response;
+        }
+        throw new IllegalArgumentException("Invalid response structure: 'response' field is missing or not a Map.");
     }
 }

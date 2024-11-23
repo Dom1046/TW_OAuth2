@@ -1,5 +1,6 @@
 package security.com.securityjwt.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,13 +16,18 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import security.com.securityjwt.jwt.filter.JWTFilter;
 import security.com.securityjwt.jwt.filter.LoginFilter;
 import security.com.securityjwt.jwt.filter.LogoutFilter;
 import security.com.securityjwt.jwt.util.JWTUtil;
+import security.com.securityjwt.oauth2.handler.CustomSuccessHandler;
 import security.com.securityjwt.oauth2.service.CustomOAuth2UserService;
 import security.com.securityjwt.service.AccessTokenBlackList;
 import security.com.securityjwt.service.RefreshTokenService;
+
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -29,24 +35,43 @@ import security.com.securityjwt.service.RefreshTokenService;
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
+    // 토큰 만료 시간
+    @Value("${spring.jwt.access-token-validity-in-milliseconds}") private Long accessTokenValidity;
+    @Value("${spring.jwt.refresh-token-validity-in-milliseconds}") private Long accessRefreshTokenValidity;
 
-    @Value("${spring.jwt.access-token-validity-in-milliseconds}")
-    private Long accessTokenValidity;
-    @Value("${spring.jwt.refresh-token-validity-in-milliseconds}")
-    private Long accessRefreshTokenValidity;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final AccessTokenBlackList accessTokenBlackList;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // cors 필터
+        http
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+
+                    CorsConfiguration configuration = new CorsConfiguration();
+                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                    configuration.setAllowedMethods(Collections.singletonList("*"));
+                    configuration.setAllowCredentials(true);
+                    configuration.setAllowedHeaders(Collections.singletonList("*"));
+                    configuration.setMaxAge(3600L);
+                    configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+                    configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+                    return configuration;
+
+                }));
+
+        // 서버 접근 설정
         AuthenticationManager authManager = authenticationManager(authenticationConfiguration);
 
         LoginFilter loginFilter = new LoginFilter(accessTokenValidity, accessRefreshTokenValidity, authManager, jwtUtil, refreshTokenService);
@@ -54,21 +79,24 @@ public class SecurityConfig {
 
         LogoutFilter logoutFilter = new LogoutFilter(accessTokenBlackList, jwtUtil, refreshTokenService);
 
+        // 다른 기능 정지
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable);
-        //oauth2
+        // oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService)));
-
+                        .userInfoEndpoint((userInfo) -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(customSuccessHandler));
+        // 경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join", "logout").permitAll()
+                        .requestMatchers("/login", "/", "/join", "logout", "oauth2").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());
+        // 필터
         http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

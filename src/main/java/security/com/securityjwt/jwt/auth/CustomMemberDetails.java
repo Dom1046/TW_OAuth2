@@ -23,10 +23,11 @@ public class CustomMemberDetails implements UserDetails {
     public String getEmail(){
         return member.getEmail().getValue();
     }
-
     public String getUserId(){
         return member.getUserId();
     }
+    public String getRole(){return member.getRole().name();}
+
     @Override
     public String getPassword() {
         return member.getPassword().getValue();

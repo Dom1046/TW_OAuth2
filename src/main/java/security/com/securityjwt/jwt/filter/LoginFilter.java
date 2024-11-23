@@ -91,7 +91,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private Cookie createCookie(String refreshCookie) {
-        Cookie cookie = new Cookie("refreshToken", refreshCookie);
+        Cookie cookie = new Cookie("RefreshToken", refreshCookie);
         cookie.setMaxAge(3*24 * 60 * 60);
         // cookie.setSecure(true);
          cookie.setPath("/");

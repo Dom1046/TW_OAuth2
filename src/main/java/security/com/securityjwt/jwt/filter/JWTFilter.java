@@ -81,7 +81,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
                                     response.addHeader("Authorization", "Bearer " + newAccessToken);
                                     response.setStatus(HttpStatus.OK.value());
-                                    Cookie refreshTokenCookie = new Cookie("refreshToken", newRefreshToken);
+                                    Cookie refreshTokenCookie = new Cookie("RefreshToken", newRefreshToken);
                                     refreshTokenCookie.setPath("/");
                                     refreshTokenCookie.setMaxAge(3 * 24 * 60 * 60);
                                     response.addCookie(refreshTokenCookie);
@@ -157,7 +157,7 @@ public class JWTFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName())) {
+                if ("RefreshToken".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

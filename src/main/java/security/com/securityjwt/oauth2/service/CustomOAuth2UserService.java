@@ -9,6 +9,8 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import security.com.securityjwt.entity.Member;
+import security.com.securityjwt.entity.MemberRole;
+import security.com.securityjwt.entity.PasswordGenerator;
 import security.com.securityjwt.oauth2.dto.CustomOAuth2Member;
 import security.com.securityjwt.oauth2.dto.MemberDTO;
 import security.com.securityjwt.oauth2.response.GoogleResponse;
@@ -21,7 +23,6 @@ import java.util.UUID;
     리소스 서버로 부터 값을 받아와서
     어플리케이션에서 정제하는 로직
 */
-
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -49,12 +50,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return null;
         }
         String userId = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
-        Member existMember = memberRepository.findByNickname(userId);
+        Member existMember = memberRepository.findByUserId(userId);
 
         // 회원이 존재하지 않으면 자동 회원가입
         if (existMember == null) {
-            String password = UUID.randomUUID().toString();
-            Member member = new Member(userId,oAuth2Response.getName(),password,oAuth2Response.getEmail(), passwordEncoder);
+            String password = PasswordGenerator.generatePassword();
+            Member member = new Member(userId, oAuth2Response.getName(), password, oAuth2Response.getEmail(), passwordEncoder);
             memberRepository.save(member);
 
             MemberDTO memberDTO = new MemberDTO();
@@ -62,13 +63,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             memberDTO.setPassword(password);
             memberDTO.setNickname(member.getNickname().getValue());
             memberDTO.setEmail(member.getEmail().getValue());
-            memberDTO.setRole(member.getRole().name());
+            memberDTO.setRole(MemberRole.ROLE_USER.name());
 
             return new CustomOAuth2Member(memberDTO);
         } else {
-        // 회원이 존재한다면, 기존 회원정보 업데이트 후 로그인.
-            existMember.changeEmail(oAuth2Response.getEmail());
-            existMember.changeNickname(oAuth2Response.getName());
+            // 회원이 존재한다면, 비밀번호 업데이트 후 로그인.
+            String password = PasswordGenerator.generatePassword();
+            existMember.changePassword(password, passwordEncoder);
 
             memberRepository.save(existMember);
 

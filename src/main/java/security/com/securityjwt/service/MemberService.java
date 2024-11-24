@@ -3,6 +3,7 @@ package security.com.securityjwt.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import security.com.securityjwt.dto.JoinRequestDTO;
@@ -21,7 +22,7 @@ import security.com.securityjwt.repository.MemberRepository;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final BCryptPasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
     public void joinProcess(JoinRequestDTO joinRequestDTO) {
 

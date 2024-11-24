@@ -44,6 +44,6 @@ public class PasswordGenerator {
             finalPassword.append(c);
         }
 
-        return finalPassword.toString();
+        return finalPassword.substring(20);
     }
 }

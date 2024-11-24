@@ -50,7 +50,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return null;
         }
         String userId = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
-        Member existMember = memberRepository.findByUserId(userId);
+        String substring = userId.substring(12);
+        Member existMember = memberRepository.findByUserId(substring);
 
         // 회원이 존재하지 않으면 자동 회원가입
         if (existMember == null) {
@@ -61,7 +62,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             MemberDTO memberDTO = new MemberDTO();
             memberDTO.setUserId(userId);
             memberDTO.setPassword(password);
-            memberDTO.setNickname(member.getNickname().getValue());
+            memberDTO.setNickname(member.getNickname().getValue().trim().substring(15));
             memberDTO.setEmail(member.getEmail().getValue());
             memberDTO.setRole(MemberRole.ROLE_USER.name());
 

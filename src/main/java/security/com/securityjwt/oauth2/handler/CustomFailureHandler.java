@@ -19,7 +19,7 @@ public class CustomFailureHandler extends SimpleUrlAuthenticationFailureHandler 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        //배포 환경시에는 바꿔주기
+        //배포 환경시에는 바꿔주기 (자세한 내용 클라로 전송 X)
         String errorMessage = "Authentication failed. Please check your credentials or try again.";
         try {
             response.getWriter().write("{\"error\": \"" + exception.getMessage() + "\"}");

@@ -26,7 +26,7 @@ public class PasswordGenerator {
 
         // 나머지 길이를 랜덤으로 채움
         String allChars = lowerCase + upperCase + digits + specialChars;
-        int remainingLength = random.nextInt( 10)+10;
+        int remainingLength = random.nextInt(12) + 8; // 8~19 사이 값 생성
 
         for (int i = 0; i < remainingLength; i++) {
             password.append(allChars.charAt(random.nextInt(allChars.length())));
@@ -39,11 +39,12 @@ public class PasswordGenerator {
         }
         Collections.shuffle(passwordChars);
 
+        // 최종 비밀번호 생성
         StringBuilder finalPassword = new StringBuilder();
         for (char c : passwordChars) {
             finalPassword.append(c);
         }
 
-        return finalPassword.substring(20);
+        return finalPassword.toString();
     }
 }
